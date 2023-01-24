@@ -4,6 +4,7 @@ const groceryList = document.getElementById("grocery-list");
 const clearList = document.getElementById("clear-btn");
 const alert = document.querySelector(".alert");
 
+const baseMilisecondsForAlerts = 1200;
 var inputValue;
 
 // ****** SELECT ITEMS **********
@@ -13,6 +14,7 @@ var inputValue;
 // ****** EVENT LISTENERS **********
 
 groceryForm.addEventListener("submit", AddItem)
+clearList.addEventListener("click", RemoveAll)
 
 // ****** FUNCTIONS **********
 function LoadItems () {
@@ -22,9 +24,14 @@ function LoadItems () {
 function AddItem (e) {
 	e.preventDefault();
 
-	let randomHash = (Math.random() + 1).toString(36).substring(2) + (Math.random() + 1).toString(36).substring(2);
-
 	inputValue = document.getElementById("grocery").value
+
+	if (inputValue == "") {
+		ShowAlert("Digite um valor válido", "danger", baseMilisecondsForAlerts);
+		return;
+	}
+
+	let randomHash = (Math.random() + 1).toString(36).substring(2) + (Math.random() + 1).toString(36).substring(2);
 
 	let itemElement = document.createElement("div");
 	itemElement.classList.add("grocery-item")
@@ -49,16 +56,14 @@ function AddItem (e) {
 	const editBtn = itemElement.querySelector(`#delete-${randomHash}`);
 	editBtn.addEventListener("click", EditItem);
 
-	groceryList.classList.add("show-container")
-	clearList.classList.add("show-container")
+	groceryList.classList.add("show-container");
+	clearList.classList.add("show-container");
 
 	groceryList.appendChild(itemElement);
 
-	ShowAlert("Adicionado item", "success", 1200);
+	document.getElementById("grocery").value = "";
 
-	// document.querySelector(`#edit-${randomHash}`).addEventListener("click", EditItem);
-	// document.querySelector(`#delete-${randomHash}`).addEventListener("click", RemoveItem);
-
+	ShowAlert("Item adicionado", "success", baseMilisecondsForAlerts);
 }
 
 function EditItem (e) {
@@ -70,10 +75,31 @@ function RemoveItem (e) {
 	let elementMain = document.getElementById(`item-${elementHash}`)
 
 	elementMain.remove();
+
+	let itemsList = document.getElementById("grocery-list").children
+
+	if (itemsList.length == 0) {
+		groceryList.classList.remove("show-container");
+		clearList.classList.remove("show-container");
+	}
+
+	ShowAlert("Item removido", "danger", baseMilisecondsForAlerts);
 }
 
 function RemoveAll () {
+	let itemsList = document.getElementById("grocery-list").children
 
+	if (itemsList.length == 0)
+		return;
+
+	Array.from(itemsList).forEach(child => {
+		child.remove();
+	});
+
+	groceryList.classList.remove("show-container");
+	clearList.classList.remove("show-container");
+
+	ShowAlert("Itens removidos", "danger", baseMilisecondsForAlerts);
 }
 
 function ShowAlert (text, type, miliseconds) {
@@ -81,9 +107,13 @@ function ShowAlert (text, type, miliseconds) {
 	alert.classList.add(`alert-${type}`);
 	// remove alert
 	setTimeout(function () {
-		alert.textContent = "";
 		alert.classList.remove(`alert-${type}`);
+		//alert.textContent = "";
 	}, miliseconds);
+
+	setTimeout(function () {
+		alert.textContent = "";
+	}, miliseconds * 2);
 }
 
 // ****** LOCAL STORAGE **********

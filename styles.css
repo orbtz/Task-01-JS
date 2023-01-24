@@ -226,16 +226,28 @@ Lista de Compras (Grocery)
 	border-radius: 0.25rem;
 	letter-spacing: var(--spacing);
 	text-transform: capitalize;
+
+	opacity: 0;
+
+	transition: var(--transition);
 }
 
 .alert-danger {
 	color: #721c24;
 	background: #f8d7da;
+
+	opacity: 1;
+
+	transition: var(--transition);
 }
 
 .alert-success {
 	color: #155724;
 	background: #d4edda;
+
+	opacity: 1;
+
+	transition: var(--transition);
 }
 
 .grocery-form h3 {
