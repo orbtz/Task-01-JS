@@ -268,9 +268,20 @@ Lista de Compras (Grocery)
 	border-top-left-radius: var(--radius);
 	border-bottom-left-radius: var(--radius);
 	border-color: transparent;
+	border-style: solid;
 	font-size: 1rem;
 	flex: 1 0 auto;
 	color: var(--clr-grey-5);
+
+	outline: none;
+	transition: var(--transition);
+}
+
+#grocery:focus,
+#grocery:focus-visible,
+#grocery:focus-within {
+	border-color: var(--clr-primary-8);
+	transition: var(--transition);
 }
 
 #grocery::placeholder {
@@ -382,4 +393,35 @@ Lista de Compras (Grocery)
 
 .clear-btn:hover {
 	color: var(--clr-red-dark);
+}
+
+.selected-item {
+	outline-color: var(--clr-primary-8);
+	outline-style: solid;
+	outline-width: 2px;
+
+	transition: var(--transition);
+}
+
+.footer {
+	font-size: 12px;
+	text-align: center;
+
+	width: 20vw;
+	margin: 0 auto;
+	max-width: 35rem;
+
+	background: var(--clr-white);
+	border-radius: var(--radius);
+	box-shadow: var(--light-shadow);
+	transition: var(--transition);
+	padding: 1rem;
+
+	margin-top: -1rem;
+	padding-top: 2rem;
+	margin-bottom: 4rem;
+
+	position: relative;
+	z-index: -1;
+
 }

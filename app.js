@@ -14,13 +14,13 @@ var hashCurrent;
 // edit option
 
 // ****** EVENT LISTENERS **********
-
+window.addEventListener("load", LoadItems)
 groceryForm.addEventListener("submit", OnSendItemClick)
 clearList.addEventListener("click", OnRemoveAllClick)
 
 // ****** FUNCTIONS **********
 function LoadItems () {
-
+	console.log("loaded");
 }
 
 function OnSendItemClick (e) {
@@ -78,7 +78,9 @@ function EditItem (inputValue) {
 	let elementMain = document.getElementById(`item-${hashCurrent}`).getElementsByClassName("title")[0];
 
 	elementMain.innerText = groceryInput.value;
-	hashCurrent == "";
+	document.getElementById(`item-${hashCurrent}`).classList.remove("selected-item");
+
+	this.hashCurrent = "";
 	groceryInput.value = "";
 
 	ShowAlert("Item alterado", "success", baseMilisecondsForAlerts);
@@ -87,6 +89,8 @@ function EditItem (inputValue) {
 function OnEditClick (e) {
 	hashCurrent = e.rangeParent.id.split("-")[1]
 	let elementMain = document.getElementById(`item-${hashCurrent}`).getElementsByClassName("title")[0];
+
+	document.getElementById(`item-${hashCurrent}`).classList.add("selected-item");
 
 	groceryInput.value = elementMain.innerText;
 }
