@@ -1,4 +1,5 @@
 const groceryForm = document.getElementById("grocery-form");
+const groceryInput = document.getElementById("grocery");
 const submitButton = document.getElementById("submit-button");
 const groceryList = document.getElementById("grocery-list");
 const clearList = document.getElementById("clear-btn");
@@ -6,6 +7,7 @@ const alert = document.querySelector(".alert");
 
 const baseMilisecondsForAlerts = 1200;
 var inputValue;
+var hashCurrent;
 
 // ****** SELECT ITEMS **********
 
@@ -13,15 +15,15 @@ var inputValue;
 
 // ****** EVENT LISTENERS **********
 
-groceryForm.addEventListener("submit", AddItem)
-clearList.addEventListener("click", RemoveAll)
+groceryForm.addEventListener("submit", OnSendItemClick)
+clearList.addEventListener("click", OnRemoveAllClick)
 
 // ****** FUNCTIONS **********
 function LoadItems () {
 
 }
 
-function AddItem (e) {
+function OnSendItemClick (e) {
 	e.preventDefault();
 
 	inputValue = document.getElementById("grocery").value
@@ -31,12 +33,18 @@ function AddItem (e) {
 		return;
 	}
 
+	if (hashCurrent == "" || hashCurrent == undefined)
+		AddItem(inputValue);
+	else
+		EditItem(inputValue);
+}
+
+function AddItem (inputValue) {
 	let randomHash = (Math.random() + 1).toString(36).substring(2) + (Math.random() + 1).toString(36).substring(2);
 
 	let itemElement = document.createElement("div");
 	itemElement.classList.add("grocery-item")
 	itemElement.id = `item-${randomHash}`
-
 
 	itemElement.innerHTML = `
 			<p class="title">${inputValue}</p>
@@ -51,10 +59,10 @@ function AddItem (e) {
 	`
 
 	const deleteBtn = itemElement.querySelector(`#delete-${randomHash}`);
-	deleteBtn.addEventListener("click", RemoveItem);
+	deleteBtn.addEventListener("click", OnRemoveClick);
 
-	const editBtn = itemElement.querySelector(`#delete-${randomHash}`);
-	editBtn.addEventListener("click", EditItem);
+	const editBtn = itemElement.querySelector(`#edit-${randomHash}`);
+	editBtn.addEventListener("click", OnEditClick);
 
 	groceryList.classList.add("show-container");
 	clearList.classList.add("show-container");
@@ -66,11 +74,24 @@ function AddItem (e) {
 	ShowAlert("Item adicionado", "success", baseMilisecondsForAlerts);
 }
 
-function EditItem (e) {
+function EditItem (inputValue) {
+	let elementMain = document.getElementById(`item-${hashCurrent}`).getElementsByClassName("title")[0];
 
+	elementMain.innerText = groceryInput.value;
+	hashCurrent == "";
+	groceryInput.value = "";
+
+	ShowAlert("Item alterado", "success", baseMilisecondsForAlerts);
 }
 
-function RemoveItem (e) {
+function OnEditClick (e) {
+	hashCurrent = e.rangeParent.id.split("-")[1]
+	let elementMain = document.getElementById(`item-${hashCurrent}`).getElementsByClassName("title")[0];
+
+	groceryInput.value = elementMain.innerText;
+}
+
+function OnRemoveClick (e) {
 	let elementHash = e.rangeParent.id.split("-")[1]
 	let elementMain = document.getElementById(`item-${elementHash}`)
 
@@ -86,7 +107,7 @@ function RemoveItem (e) {
 	ShowAlert("Item removido", "danger", baseMilisecondsForAlerts);
 }
 
-function RemoveAll () {
+function OnRemoveAllClick () {
 	let itemsList = document.getElementById("grocery-list").children
 
 	if (itemsList.length == 0)
@@ -105,7 +126,7 @@ function RemoveAll () {
 function ShowAlert (text, type, miliseconds) {
 	alert.textContent = text;
 	alert.classList.add(`alert-${type}`);
-	// remove alert
+
 	setTimeout(function () {
 		alert.classList.remove(`alert-${type}`);
 		//alert.textContent = "";
@@ -113,7 +134,7 @@ function ShowAlert (text, type, miliseconds) {
 
 	setTimeout(function () {
 		alert.textContent = "";
-	}, miliseconds * 2);
+	}, miliseconds + 400);
 }
 
 // ****** LOCAL STORAGE **********
