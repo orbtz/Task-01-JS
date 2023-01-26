@@ -6,12 +6,8 @@ const clearList = document.getElementById("clear-btn");
 const alert = document.querySelector(".alert");
 
 const baseMilisecondsForAlerts = 1200;
-var inputValue;
 var hashCurrent;
-
-// ****** SELECT ITEMS **********
-
-// edit option
+var itemsList = [];
 
 // ****** EVENT LISTENERS **********
 window.addEventListener("load", LoadItems)
@@ -19,112 +15,172 @@ groceryForm.addEventListener("submit", OnSendItemClick)
 clearList.addEventListener("click", OnRemoveAllClick)
 
 // ****** FUNCTIONS **********
-function LoadItems () {
-	console.log("loaded");
+//    **** EVENTS ****      //
+function OnPageLoad (e) {
+	LoadItems();
+	groceryInput.value = "";
 }
 
 function OnSendItemClick (e) {
 	e.preventDefault();
 
-	inputValue = document.getElementById("grocery").value
-
-	if (inputValue == "") {
+	if (groceryInput.value == "") {
 		ShowAlert("Digite um valor válido", "danger", baseMilisecondsForAlerts);
 		return;
 	}
 
 	if (hashCurrent == "" || hashCurrent == undefined)
-		AddItem(inputValue);
+		AddItem(groceryInput.value);
 	else
-		EditItem(inputValue);
-}
-
-function AddItem (inputValue) {
-	let randomHash = (Math.random() + 1).toString(36).substring(2) + (Math.random() + 1).toString(36).substring(2);
-
-	let itemElement = document.createElement("div");
-	itemElement.classList.add("grocery-item")
-	itemElement.id = `item-${randomHash}`
-
-	itemElement.innerHTML = `
-			<p class="title">${inputValue}</p>
-			<div class="btn-container">
-				<button class="edit-btn" id="edit-${randomHash}" type="button">
-					<i class="fas fa-edit"></i>
-				</button>
-				<button class="delete-btn" id="delete-${randomHash}" type="button">
-					<i class="fas fa-trash"></i>
-				</button>
-			</div>
-	`
-
-	const deleteBtn = itemElement.querySelector(`#delete-${randomHash}`);
-	deleteBtn.addEventListener("click", OnRemoveClick);
-
-	const editBtn = itemElement.querySelector(`#edit-${randomHash}`);
-	editBtn.addEventListener("click", OnEditClick);
-
-	groceryList.classList.add("show-container");
-	clearList.classList.add("show-container");
-
-	groceryList.appendChild(itemElement);
-
-	document.getElementById("grocery").value = "";
-
-	ShowAlert("Item adicionado", "success", baseMilisecondsForAlerts);
-}
-
-function EditItem (inputValue) {
-	let elementMain = document.getElementById(`item-${hashCurrent}`).getElementsByClassName("title")[0];
-
-	elementMain.innerText = groceryInput.value;
-	document.getElementById(`item-${hashCurrent}`).classList.remove("selected-item");
-
-	this.hashCurrent = "";
-	groceryInput.value = "";
-
-	ShowAlert("Item alterado", "success", baseMilisecondsForAlerts);
+		EditItem(groceryInput.value);
 }
 
 function OnEditClick (e) {
+	if (hashCurrent != "" && hashCurrent != undefined)
+		SetSelection(hashCurrent, false);
+
 	hashCurrent = e.rangeParent.id.split("-")[1]
 	let elementMain = document.getElementById(`item-${hashCurrent}`).getElementsByClassName("title")[0];
 
-	document.getElementById(`item-${hashCurrent}`).classList.add("selected-item");
+	SetSelection(hashCurrent, true);
 
+	submitButton.textContent = "Editar";
 	groceryInput.value = elementMain.innerText;
 }
 
 function OnRemoveClick (e) {
+	if (hashCurrent != "" && hashCurrent != undefined) {
+		SetSelection(hashCurrent, false);
+
+		hashCurrent = "";
+		groceryInput.value = "";
+		submitButton.textContent = "Enviar";
+	}
+
 	let elementHash = e.rangeParent.id.split("-")[1]
 	let elementMain = document.getElementById(`item-${elementHash}`)
+	let elementValue = document.getElementById(`item-${elementHash}`).getElementsByClassName("title")[0];
 
 	elementMain.remove();
 
-	let itemsList = document.getElementById("grocery-list").children
+	let tempDelete = {
+		hash: elementHash,
+		value: elementValue.textContent
+	}
+
+	RemoveItemFromList(tempDelete);
 
 	if (itemsList.length == 0) {
 		groceryList.classList.remove("show-container");
 		clearList.classList.remove("show-container");
 	}
 
+	SetLocalStorage();
+
 	ShowAlert("Item removido", "danger", baseMilisecondsForAlerts);
 }
 
 function OnRemoveAllClick () {
-	let itemsList = document.getElementById("grocery-list").children
+	let elementItemsList = document.getElementById("grocery-list").children
 
-	if (itemsList.length == 0)
+	if (elementItemsList.length == 0)
 		return;
 
-	Array.from(itemsList).forEach(child => {
+	Array.from(elementItemsList).forEach(child => {
 		child.remove();
 	});
 
 	groceryList.classList.remove("show-container");
 	clearList.classList.remove("show-container");
 
+	itemsList.length = 0;
+	SetLocalStorage();
+
 	ShowAlert("Itens removidos", "danger", baseMilisecondsForAlerts);
+}
+
+//     **** AUXS ****       //
+function LoadItems () {
+	let storedItems = GetLocalStorage();
+
+	if (storedItems == "" || storedItems == undefined || JSON.parse(storedItems).length == 0)
+		return;
+
+	console.log(JSON.parse(storedItems));
+	itemsList = JSON.parse(storedItems);
+
+	itemsList.forEach(item => {
+		IncludeItemOnPage(item.hash, item.value)
+	});
+}
+
+function AddItem (inputValue) {
+	let randomHash = GetRandomHash();
+
+	IncludeItemOnPage(randomHash, inputValue);
+
+	groceryInput.value = "";
+
+	let tempAdd = {
+		hash: randomHash,
+		value: inputValue
+	}
+
+	itemsList.push(tempAdd);
+
+	SetLocalStorage();
+
+	ShowAlert("Item adicionado", "success", baseMilisecondsForAlerts);
+}
+
+function IncludeItemOnPage (hash, value) {
+	let itemElement = document.createElement("div");
+	itemElement.classList.add("grocery-item")
+	itemElement.id = `item-${hash}`
+
+	itemElement.innerHTML = `
+			<p class="title">${value}</p>
+			<div class="btn-container">
+				<button class="edit-btn" id="edit-${hash}" type="button">
+					<i class="fas fa-edit"></i>
+				</button>
+				<button class="delete-btn" id="delete-${hash}" type="button">
+					<i class="fas fa-trash"></i>
+				</button>
+			</div>
+	`
+
+	const deleteBtn = itemElement.querySelector(`#delete-${hash}`);
+	deleteBtn.addEventListener("click", OnRemoveClick);
+
+	const editBtn = itemElement.querySelector(`#edit-${hash}`);
+	editBtn.addEventListener("click", OnEditClick);
+
+	groceryList.classList.add("show-container");
+	clearList.classList.add("show-container");
+
+	groceryList.appendChild(itemElement);
+}
+
+function EditItem (inputValue) {
+	let elementMain = document.getElementById(`item-${hashCurrent}`).getElementsByClassName("title")[0];
+
+	elementMain.innerText = inputValue;
+
+	SetSelection(hashCurrent, false);
+
+	let tempEdit = {
+		hash: hashCurrent,
+		value: inputValue
+	}
+	EditItemOnList(tempEdit);
+
+	this.hashCurrent = "";
+	groceryInput.value = "";
+	submitButton.textContent = "Enviar";
+
+	SetLocalStorage();
+	ShowAlert("Item alterado", "success", baseMilisecondsForAlerts);
 }
 
 function ShowAlert (text, type, miliseconds) {
@@ -141,6 +197,50 @@ function ShowAlert (text, type, miliseconds) {
 	}, miliseconds + 400);
 }
 
+function GetRandomHash () {
+	return (Math.random() + 1).toString(36).substring(2) + (Math.random() + 1).toString(36).substring(2);
+}
+
+function SetSelection (hash, willAdd) {
+	if (willAdd)
+		document.getElementById(`item-${hash}`).classList.add("selected-item");
+	else
+		document.getElementById(`item-${hash}`).classList.remove("selected-item");
+}
+
 // ****** LOCAL STORAGE **********
 
+function SetLocalStorage () {
+	localStorage.setItem("items", JSON.stringify(itemsList))
+	//[{ "id": "1223fdsfd3", "valor": 10 }, { "id": "1223fdsf483", "valor": 55 }]
+}
+
+function GetLocalStorage () {
+	return localStorage.items;
+}
+
 // ****** SETUP ITEMS **********
+
+function RemoveItemFromList (itemRemove) {
+	let tempList = [];
+
+	itemsList.forEach(item => {
+		if (item.hash != itemRemove.hash)
+			tempList.push(item);
+	});
+
+	itemsList = tempList;
+}
+
+function EditItemOnList (itemEdit) {
+	let tempList = [];
+
+	itemsList.forEach(item => {
+		if (item.hash == itemEdit.hash)
+			item.value = itemEdit.value;
+
+		tempList.push(item);
+	});
+
+	itemsList = tempList;
+}
