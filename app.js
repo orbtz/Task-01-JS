@@ -6,13 +6,13 @@ const clearList = document.getElementById("clear-btn");
 const alert = document.querySelector(".alert");
 
 const baseMilisecondsForAlerts = 1200;
-var hashCurrent;
-var itemsList = [];
+let hashCurrent;
+let itemsList = [];
 
 // ****** EVENT LISTENERS **********
-window.addEventListener("load", LoadItems)
-groceryForm.addEventListener("submit", OnSendItemClick)
-clearList.addEventListener("click", OnRemoveAllClick)
+self.addEventListener("load", OnPageLoad);
+groceryForm.addEventListener("submit", OnSendItemClick);
+clearList.addEventListener("click", OnRemoveAllClick);
 
 // ****** FUNCTIONS **********
 //    **** EVENTS ****      //
@@ -39,8 +39,10 @@ function OnEditClick (e) {
 	if (hashCurrent != "" && hashCurrent != undefined)
 		SetSelection(hashCurrent, false);
 
-	hashCurrent = this.id.split("-")[1]
-	let elementMain = document.getElementById(`item-${hashCurrent}`).getElementsByClassName("title")[0];
+	hashCurrent = this.id.split("-")[1];
+	let elementMain = document
+		.getElementById(`item-${hashCurrent}`)
+		.getElementsByClassName("title")[0];
 
 	SetSelection(hashCurrent, true);
 
@@ -57,16 +59,19 @@ function OnRemoveClick (e) {
 		submitButton.textContent = "Enviar";
 	}
 
-	let elementHash = this.id.split("-")[1]
-	let elementMain = document.getElementById(`item-${elementHash}`)
-	let elementValue = document.getElementById(`item-${elementHash}`).getElementsByClassName("title")[0];
+	let elementHash = this.id.split("-")[1];
+	let elementMain = document.getElementById(`item-${elementHash}`);
+	let elementValue = document
+		.getElementById(`item-${elementHash}`)
+		.getElementsByClassName("title")[0];
 
 	elementMain.remove();
 
 	let tempDelete = {
 		hash: elementHash,
-		value: elementValue.textContent
-	}
+		value: elementValue.textContent,
+	};
+
 
 	RemoveItemFromList(tempDelete);
 
@@ -81,12 +86,9 @@ function OnRemoveClick (e) {
 }
 
 function OnRemoveAllClick () {
-	let elementItemsList = document.getElementById("grocery-list").children
+	if (groceryList.children.length == 0) return;
 
-	if (elementItemsList.length == 0)
-		return;
-
-	Array.from(elementItemsList).forEach(child => {
+	Array.from(groceryList.children).forEach((child) => {
 		child.remove();
 	});
 
@@ -103,14 +105,18 @@ function OnRemoveAllClick () {
 function LoadItems () {
 	let storedItems = GetLocalStorage();
 
-	if (storedItems == "" || storedItems == undefined || JSON.parse(storedItems).length == 0)
+	if (
+		storedItems == "" ||
+		storedItems == undefined ||
+		JSON.parse(storedItems).length == 0
+	)
 		return;
 
 	console.log(JSON.parse(storedItems));
 	itemsList = JSON.parse(storedItems);
 
-	itemsList.forEach(item => {
-		IncludeItemOnPage(item.hash, item.value)
+	itemsList.forEach((item) => {
+		IncludeItemOnPage(item.hash, item.value);
 	});
 }
 
@@ -124,7 +130,7 @@ function AddItem (inputValue) {
 	let tempAdd = {
 		hash: randomHash,
 		value: inputValue
-	}
+	};
 
 	itemsList.push(tempAdd);
 
@@ -135,8 +141,8 @@ function AddItem (inputValue) {
 
 function IncludeItemOnPage (hash, value) {
 	let itemElement = document.createElement("div");
-	itemElement.classList.add("grocery-item")
-	itemElement.id = `item-${hash}`
+	itemElement.classList.add("grocery-item");
+	itemElement.id = `item-${hash}`;
 
 	itemElement.innerHTML = `
 			<p class="title">${value}</p>
@@ -148,7 +154,7 @@ function IncludeItemOnPage (hash, value) {
 					<i class="fas fa-trash"></i>
 				</button>
 			</div>
-	`
+	`;
 
 	const deleteBtn = itemElement.querySelector(`#delete-${hash}`);
 	deleteBtn.addEventListener("click", OnRemoveClick);
@@ -163,7 +169,9 @@ function IncludeItemOnPage (hash, value) {
 }
 
 function EditItem (inputValue) {
-	let elementMain = document.getElementById(`item-${hashCurrent}`).getElementsByClassName("title")[0];
+	let elementMain = document
+		.getElementById(`item-${hashCurrent}`)
+		.getElementsByClassName("title")[0];
 
 	elementMain.innerText = inputValue;
 
@@ -171,8 +179,8 @@ function EditItem (inputValue) {
 
 	let tempEdit = {
 		hash: hashCurrent,
-		value: inputValue
-	}
+		value: inputValue,
+	};
 	EditItemOnList(tempEdit);
 
 	this.hashCurrent = "";
@@ -198,7 +206,10 @@ function ShowAlert (text, type, miliseconds) {
 }
 
 function GetRandomHash () {
-	return (Math.random() + 1).toString(36).substring(2) + (Math.random() + 1).toString(36).substring(2);
+	return (
+		(Math.random() + 1).toString(36).substring(2) +
+		(Math.random() + 1).toString(36).substring(2)
+	);
 }
 
 function SetSelection (hash, willAdd) {
@@ -211,7 +222,7 @@ function SetSelection (hash, willAdd) {
 // ****** LOCAL STORAGE **********
 
 function SetLocalStorage () {
-	localStorage.setItem("items", JSON.stringify(itemsList))
+	localStorage.setItem("items", JSON.stringify(itemsList));
 	//[{ "id": "1223fdsfd3", "valor": 10 }, { "id": "1223fdsf483", "valor": 55 }]
 }
 
@@ -224,9 +235,8 @@ function GetLocalStorage () {
 function RemoveItemFromList (itemRemove) {
 	let tempList = [];
 
-	itemsList.forEach(item => {
-		if (item.hash != itemRemove.hash)
-			tempList.push(item);
+	itemsList.forEach((item) => {
+		if (item.hash != itemRemove.hash) tempList.push(item);
 	});
 
 	itemsList = tempList;
@@ -235,9 +245,8 @@ function RemoveItemFromList (itemRemove) {
 function EditItemOnList (itemEdit) {
 	let tempList = [];
 
-	itemsList.forEach(item => {
-		if (item.hash == itemEdit.hash)
-			item.value = itemEdit.value;
+	itemsList.forEach((item) => {
+		if (item.hash == itemEdit.hash) item.value = itemEdit.value;
 
 		tempList.push(item);
 	});
