@@ -39,7 +39,7 @@ function OnEditClick (e) {
 	if (hashCurrent != "" && hashCurrent != undefined)
 		SetSelection(hashCurrent, false);
 
-	hashCurrent = e.rangeParent.id.split("-")[1]
+	hashCurrent = this.id.split("-")[1]
 	let elementMain = document.getElementById(`item-${hashCurrent}`).getElementsByClassName("title")[0];
 
 	SetSelection(hashCurrent, true);
@@ -57,7 +57,7 @@ function OnRemoveClick (e) {
 		submitButton.textContent = "Enviar";
 	}
 
-	let elementHash = e.rangeParent.id.split("-")[1]
+	let elementHash = this.id.split("-")[1]
 	let elementMain = document.getElementById(`item-${elementHash}`)
 	let elementValue = document.getElementById(`item-${elementHash}`).getElementsByClassName("title")[0];
 

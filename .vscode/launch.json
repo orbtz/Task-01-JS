@@ -2,7 +2,13 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"name": "Launch localhost",
+			"name": "L. Chrome Local",
+			"type": "chrome",
+			"request": "launch",
+			"file": "${workspaceFolder}/index.html"
+		},
+		{
+			"name": "L. Firefox Local",
 			"type": "firefox",
 			"request": "launch",
 			"reAttach": true,
